@@ -1,0 +1,45 @@
+
+```{r}
+install.packages('devtools')
+install.packages('repr')
+devtools::install_github('behavioral-ds/evently')
+```
+
+
+```{r}
+library(evently)
+library(repr)
+
+options(repr.plot.width=14, repr.plot.height=7, repr.plot.res = 200)
+```
+
+```{r}
+get_data <- function(path) {
+  history <- read.csv(file = path, header = T)
+  history <- history[order(history$time),]
+  return (history)
+}
+```
+
+```{r}
+print_results <- function(model) {
+  print(plot_event_series(model))
+  print(predict_final_popularity(model))
+  print(get_branching_factor(model))
+}
+```
+
+```{r}
+experiment <- function(path, model_type, time) {
+  history1 <- get_data(path)
+  fitted_model1 <- fit_series(history1, model_type = model_type, observation_time = time, cores = 2)
+  print_results(fitted_model1)
+}
+experiment('tweetsmg2.csv', 'EXP', 2009973)
+experiment('tweetsmg2.csv', 'mEXP', 2009973)
+```
+
+```{r}
+experiment('tweetsw.csv', 'EXP', 57313)
+experiment('tweetsw.csv', 'mEXP', 57313)
+```
