@@ -23,6 +23,7 @@ get_data <- function(path) {
 
 ```{r}
 print_results <- function(model) {
+  print(model)
   print(plot_event_series(model))
   print(predict_final_popularity(model))
   print(get_branching_factor(model))
