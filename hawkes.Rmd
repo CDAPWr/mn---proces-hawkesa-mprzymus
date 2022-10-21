@@ -13,12 +13,23 @@ library(repr)
 options(repr.plot.width=14, repr.plot.height=7, repr.plot.res = 200)
 ```
 
+Dane to odpowiedzi na tweety. Z tego względu, wydają się dość dobre - po czasie reakcje na tweeta słabną, a komentarz powoduje kolejne.
 ```{r}
 get_data <- function(path) {
   history <- read.csv(file = path, header = T)
   history <- history[order(history$time),]
   return (history)
 }
+
+plot_time_shift <- function(data1) {
+  print(data1)
+  after_last_time = c(0)
+  for (i in 2:length(data1$time))
+    after_last_time[i] <- data1$time[i] - data1$time[i-1]
+  print(plot(after_last_time))
+}
+plot_time_shift(get_data('tweetsmg2.csv'))
+plot_time_shift(get_data('tweetsw.csv'))
 ```
 
 ```{r}
@@ -31,16 +42,21 @@ print_results <- function(model) {
 ```
 
 ```{r}
-experiment <- function(path, model_type, time) {
+experiment <- function(path, model_type, time_train=2000) {
   history1 <- get_data(path)
-  fitted_model1 <- fit_series(history1, model_type = model_type, observation_time = time, cores = 2)
+  train_history <- history1[with(history1, time <= time_train),]
+  fitted_model1 <- fit_series(train_history, model_type = model_type, observation_time = max(train_history$time), cores = 2)
   print_results(fitted_model1)
+  print(plot_event_series(fitted_model1, cascade = history1))
+  train_size = length(train_history$time)
+  cat(sprintf("train size %s\n", train_size))
+  return(fitted_model1)
 }
-experiment('tweetsmg2.csv', 'EXP', 2009973)
-experiment('tweetsmg2.csv', 'mEXP', 2009973)
+experiment('tweetsmg2.csv', 'EXP')
+m <- experiment('tweetsmg.csv', 'mEXP')
 ```
 
 ```{r}
-experiment('tweetsw.csv', 'EXP', 57313)
-experiment('tweetsw.csv', 'mEXP', 57313)
+experiment('tweetsw.csv', 'EXP', 30000)
+mexp = experiment('tweetsw.csv', 'mEXP', 30000)
 ```
